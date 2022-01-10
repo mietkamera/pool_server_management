@@ -1,0 +1,117 @@
+
+# Dieses Shellscript-Snippet implementiert die Statusuebergaenge eines Kamerasystems 
+# nach erfolgreichen oder fehlgeschlagenen Connect-Versuchen. Das Script wertet 
+# folgende Variablen aus:
+# SCRIPT_PATH:  Absoluter Pfad zum Kameraverzeichnis
+# EXITVAL:      0 = ok, <>0 Fehler beim Connect-Test
+# IDENT:        Text, der die Kamera identifiziert (IP-Adresse:Port)
+# CONTACT:      Ansprechpartner vor Ort mit Telefonnummer
+# DESCRIPTION:  Projektname und Kameraname
+# ERRTEXT:      Fehlerbeschreibung
+
+# Wann soll eine zweite Emailadresse informiert werden, wenn der Status noch immer auf fail steht?
+declare -i ESCALATEAFTER
+ESCALATEAFTER=`expr 60 \* 60 \* 4`
+
+# Wann soll die Alarmierung insgesamt wiederholt werden?
+declare -i REPEATAFTER
+REPEATAFTER=`expr 60 \* 60 \* 24`
+
+STATUS=`head -1 ${SCRIPT_PATH}/status 2>/dev/null`
+[ "${STATUS}" == "" ] && STATUS='ok'
+[ -d ${SCRIPT_PATH}/monitor ] || mkdir -p ${SCRIPT_PATH}/monitor
+case "${STATUS}" in
+  ok)
+    if [ "${EXITVAL}" == "0" ]; then
+      echo -n "ok" > ${SCRIPT_PATH}/status
+    else
+      echo -n "soft_fail" > ${SCRIPT_PATH}/status
+    fi
+    ;;
+  soft_fail)
+    if [ "${EXITVAL}" == "0" ]; then
+      echo -n "ok" > ${SCRIPT_PATH}/status
+    else
+      echo -n "soft_fail2" > ${SCRIPT_PATH}/status
+    fi
+    ;;
+  soft_fail2)
+    if [ "${EXITVAL}" == "0" ]; then
+      echo -n "ok" > ${SCRIPT_PATH}/status
+    else
+      echo -n "fail" > ${SCRIPT_PATH}/status
+      echo -n "${IDENT} offline\n${ERRTEXT}" > ${SCRIPT_PATH}/monitor/`date +%Y%m%d%H%M`.log
+      if [ "${EMAIL}" != "" -a "${EMAIL_ACTIVE}" == "1" ]; then
+        MAILTEXT="${IDENT} offline\n${ERRTEXT}\nKontakt: ${CONTACT}"
+        echo -n ${MAILTEXT} | mail -s "Webcam ${DESCRIPTION} offline" ${FROM} ${EMAIL}
+      fi
+    fi
+    ;;
+  fail)
+    if [ "${EXITVAL}" == "0" ]; then
+      echo -n "soft_ok" > ${SCRIPT_PATH}/status
+    else
+      CURTIME=`date +%s`
+      my_stat=`stat -t ${SCRIPT_PATH}/status 2>/dev/null`
+      read name size blocks unk uid gid dev inode links unk2 unk3 last_access last_mod last_change ioblock << ENDHERE
+        $(echo $my_stat)
+ENDHERE
+      if [ $last_mod ]; then
+        TIME_DIFF=`expr ${CURTIME} - ${last_mod}`
+        if [ ${TIME_DIFF} -gt ${ESCALATEAFTER} ]; then
+          MAILTEXT="${IDENT} offline\n${ERRTEXT}\nKontakt: ${CONTACT}"
+          if [ "${EMAIL}" != "" -a "${EMAIL_ACTIVE}" == "1" ]; then
+            echo -n "${MAILTEXT}" | mail -s "Webcam ${DESCRIPTION} still offline (4h)" ${FROM} ${EMAIL}
+          fi
+          if [ "${EMAIL2}" != "" -a "${EMAIL2_ACTIVE}" == "1" ]; then
+            echo -n "${MAILTEXT}" | mail -s "Webcam ${DESCRIPTION} still offline (4h)" ${FROM} ${EMAIL2}
+          fi
+          echo -n "escalated" > ${SCRIPT_PATH}/status
+        fi
+      fi
+    fi
+    ;;
+  escalated)
+    if [ "${EXITVAL}" == "0" ]; then
+      echo -n "soft_ok" > ${SCRIPT_PATH}/status
+    else
+      CURTIME=`date +%s`
+      my_stat=`stat -t ${SCRIPT_PATH}/status 2>/dev/null`
+      read name size blocks unk uid gid dev inode links unk2 unk3 last_access last_mod last_change ioblock << ENDHERE
+        $(echo $my_stat)
+ENDHERE
+      if [ $last_mod ]; then
+        TIME_DIFF=`expr ${CURTIME} - ${last_mod}`
+        if [ ${TIME_DIFF} -gt ${REPEATAFTER} ]; then
+          MAILTEXT="${IDENT} offline\n${ERRTEXT}\nKontakt: ${CONTACT}"
+          if [ "${EMAIL}" != "" -a "${EMAIL_ACTIVE}" == "1" ]; then
+            echo -n "${MAILTEXT}" | mail -s "Webcam ${DESCRIPTION} still offline (>24h)" ${FROM} ${EMAIL}
+          fi
+          if [ "${EMAIL2}" != "" -a "${EMAIL2_ACTIVE}" == "1" ]; then
+            echo -n "${MAILTEXT}" | mail -s "Webcam ${DESCRIPTION} still offline (>24h)" ${FROM} ${EMAIL2}
+          fi
+          echo -n "escalated" > ${SCRIPT_PATH}/status
+        fi
+      fi
+    fi
+    ;;
+  soft_ok)
+    if [ "${EXITVAL}" == "0" ]; then
+      MAILTEXT="${IDENT} online\n"
+      if [ "${EMAIL}" != "" -a "${EMAIL_ACTIVE}" == "1" ]; then
+        echo -n "${MAILTEXT}" | mail -s "Webcam ${DESCRIPTION} online" ${FROM} ${EMAIL}
+      fi
+      if [ "${EMAIL2}" != "" -a "${EMAIL2_ACTIVE}" == "1" ]; then
+        echo -n "${MAILTEXT}" | mail -s "Webcam ${DESCRIPTION} online" ${FROM} ${EMAIL2}
+      fi
+      echo -n "${IDENT} online" > ${SCRIPT_PATH}/monitor/`date +%Y%m%d%H%M`.log
+      echo -n "ok" > ${SCRIPT_PATH}/status
+    else
+      echo -n "soft_fail" > ${SCRIPT_PATH}/status
+    fi
+    ;;
+  *)
+    echo -n "soft_fail" > ${SCRIPT_PATH}/status
+    ;;
+esac
+exit ${EXITVAL}

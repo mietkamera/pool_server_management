@@ -1,0 +1,63 @@
+
+# Dieses Shellscript-Snippet implementiert einen HTTP-Test unserer mobilen
+# Kameraanlagen
+
+CURL=`which curl`
+ERRTEXT=""
+SUBDIR=img/`date +%Y/%m/%d/`
+LASTIMAGE=`ls $SCRIPT_PATH/$SUBDIR*.jpg 2>/dev/null | sort | tail -n1 2>/dev/null`
+if [ "${LASTIMAGE}" == "" ]; then
+  if [ -L $SCRIPT_PATH/img/lastimage.jpg ]; then
+    SUBDIR=`readlink $SCRIPT_PATH/img/lastimage.jpg | awk -F'/' '{ print "img/"$1"/"$2"/"$3 }'`
+  fi
+fi
+
+# Erst mal nachsehen, ab wann und bis wann Bilder gemacht werden muessen
+STARTTIME=`date +%s -d "\`date +%Y\`-\`date +%m\`-\`date +%d\` $IMAGE_START:00"`
+STOPTIME=`date +%s -d "\`date +%Y\`-\`date +%m\`-\`date +%d\` $IMAGE_STOP:59"`
+CURTIME=`date +%s`
+
+if [ -d $SCRIPT_PATH/$SUBDIR ]; then
+  LASTIMAGE=`ls $SCRIPT_PATH/$SUBDIR*.jpg 2>/dev/null | sort | tail -n1 2>/dev/null`
+
+  if [ $STARTTIME -lt $CURTIME -a $STOPTIME -ge $CURTIME ]; then
+    if [ "${LASTIMAGE}" == "" ]; then
+      ERRTEXT="Keine Bilder fuer diesen Tag"
+      EXITVAL=1
+    else
+      pic_stat=`stat -t $LASTIMAGE 2>/dev/null`
+      read name size blocks unk uid gid dev inode links unk2 unk3 last_access last_mod last_change ioblock << ENDFTIME
+        $(echo $pic_stat)
+ENDFTIME
+      EXITVAL=1
+      if [ $last_mod ]; then
+        TIME_DIFF=`expr ${CURTIME} - ${last_mod}`
+        if [ ${FILETIMEDIFF} -gt ${TIME_DIFF} ]; then
+          EXITVAL=0
+        else
+          ERRTEXT="Letztes Bild zu alt (${TIME_DIFF} sec)"
+        fi
+      fi
+    fi
+  else
+    ${CURL} -k --connect-timeout 20 --max-time 30 "${CURL_CAMERA_URI}" >/dev/null 2>&1
+    RETC=$?
+    if [ ${RETC} != "0" ]; then
+      ERRTEXT="Webcam failed"
+      ${CURL} -k --connect-timeout 20 --max-time 30 "${CURL_ROUTER_URI}" >/dev/null 2>&1
+      RETR=$?
+      if [ ${RETR} != "0" ]; then
+        ERRTEXT=${ERRTEXT}"\nRouter failed"
+        EXITVAL=3
+      else
+        ERRTEXT=${ERRTEXT}"\nRouter ok"
+        EXITVAL=1
+      fi
+    else
+      EXITVAL=0
+    fi
+  fi
+else
+  ERRTEXT="Keine Bilder fuer diesen Tag"
+  EXITVAL=1
+fi

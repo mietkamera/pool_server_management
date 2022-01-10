@@ -1,0 +1,67 @@
+
+# Dieses Shellscript-Snippet implementiert einen Test, ob es aktuelle Bilder gibt oder nicht
+
+ERRTEXT=""
+SUBDIR="img/"`date +%Y/%m/%d/`
+LASTIMAGE=`ls $SCRIPT_PATH/$SUBDIR*.jpg 2>/dev/null | sort | tail -n1 2>/dev/null`
+if [ "${LASTIMAGE}" == "" ]; then
+  if [ -L $SCRIPT_PATH/img/lastimage.jpg ]; then
+    SUBDIR=`readlink $SCRIPT_PATH/img/lastimage.jpg | awk -F'/' '{ print "img/"$1"/"$2"/"$3 }'`
+  fi
+fi
+
+# Erst mal nachsehen, ab wann und bis wann Bilder gemacht werden muessen
+STARTTIME=`date +%s -d "\`date +%Y\`-\`date +%m\`-\`date +%d\` $IMAGE_START:00"`
+STOPTIME=`date +%s -d "\`date +%Y\`-\`date +%m\`-\`date +%d\` $IMAGE_STOP:59"`
+CURTIME=`date +%s`
+
+LASTIMAGE=`ls $SCRIPT_PATH/$SUBDIR*.jpg | sort | tail -n1 2>/dev/null`
+
+if [ $STARTTIME -gt $CURTIME ]; then
+  STATUS=`head -1 ${SCRIPT_PATH}/status 2>/dev/null`
+  if [ "${STATUS}" == "ok" ]; then
+    EXITVAL=0
+   else
+    EXITVAL=1
+  fi
+else
+  if [ $STOPTIME -ge $CURTIME ]; then
+    if [ "${LASTIMAGE}" == "" ]; then
+      ERRTEXT="Keine Bilder fuer diesen Tag"
+      EXITVAL=1
+    else
+      pic_stat=`stat -t $LASTIMAGE 2>/dev/null`
+      read name size blocks unk uid gid dev inode links unk2 unk3 last_access last_mod last_change ioblock << ENDFTIME
+        $(echo $pic_stat)
+ENDFTIME
+      EXITVAL=1
+      if [ $last_mod ]; then
+        TIME_DIFF=`expr ${CURTIME} - ${last_mod}`
+        if [ ${FILETIMEDIFF} -gt ${TIME_DIFF} ]; then
+          EXITVAL=0
+        else
+          ERRTEXT="Letztes Bild zu alt (${TIME_DIFF} sec)"
+        fi
+      fi
+    fi
+  else
+    if [ "${LASTIMAGE}" == "" ]; then
+      ERRTEXT="Keine Bilder fuer diesen Tag"
+      EXITVAL=1
+    else
+      pic_stat=`stat -t $LASTIMAGE 2>/dev/null`
+      read name size blocks unk uid gid dev inode links unk2 unk3 last_access last_mod last_change ioblock << ENDFTIME
+        $(echo $pic_stat)
+ENDFTIME
+      EXITVAL=1
+      if [ $last_mod ]; then
+        TIME_DIFF=`expr ${STOPTIME} - ${last_mod}`
+        if [ ${FILETIMEDIFF} -gt ${TIME_DIFF} ]; then
+          EXITVAL=0
+        else
+          ERRTEXT="Letztes Bild zu alt (${TIME_DIFF} sec)"
+        fi
+      fi
+    fi
+  fi
+fi
