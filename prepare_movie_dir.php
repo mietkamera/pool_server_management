@@ -51,9 +51,10 @@
 	  	    
 	  	    $cache = file($image_cache);
 	  	    switch (strlen($date)) {
-	  	  	  case 0:
-	  	  		$images = $cache;
-	  	  		break;
+                      case 0:
+	  	      	foreach($cache as $row)
+	  	      	  $images[] = 'img/'.$row;
+	  	  	break;
 	  	      case 4:
 	  	      	foreach($cache as $row)
 	  	      	  $images[] = 'img/'.$date.'/'.$row;
