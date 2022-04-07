@@ -51,10 +51,10 @@
 	  	    
 	  	    $cache = file($image_cache);
 	  	    switch (strlen($date)) {
-                      case 0:
+	  	  	  case 0:
 	  	      	foreach($cache as $row)
-	  	      	  $images[] = 'img/'.$row;
-	  	  	break;
+	  	  		  $images[] = 'img/'.$row;
+	  	  		break;
 	  	      case 4:
 	  	      	foreach($cache as $row)
 	  	      	  $images[] = 'img/'.$date.'/'.$row;
@@ -107,6 +107,7 @@
         }
       }
     }
+    sort($images);
     return $images;
   }
   
@@ -172,9 +173,14 @@
 
   /* Ende Hilfsfunktionen **************************************************************** */
   
-  
+  if (isset($argv[1]) && intval($argv[1])>0 && intval($argv[1])<53) {
+    $kw = $argv[1];
+  } else {
+  	$kw = date("W",time());
+  }
+  	
   $st_dir = scandir(_SHORT_DIR_);
-  $kw = date("W",time());
+  
   foreach($st_dir as $dir) {
     if (is_file(_SHORT_DIR_.'/'.$dir.'/shorttag.data')) {
       $data = array();
