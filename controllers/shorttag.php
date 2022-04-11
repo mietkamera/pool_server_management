@@ -825,7 +825,9 @@
                 'cd '.$directory."\n".
                 'SHORTTAG='.$this->shorttag."\n".
                 'SUBDIR=img'."\n".
+                'cd '.$directory."/${SUBDIR}\n".
                 'YEARS=`ls -d 20[[:digit:]][[:digit:]] | sort`'."\n".
+                'cd '.$directory."\n".
                 'if [ "${YEARS}" != "" ]; then'."\n".
                 '  [ -d tmp ] && rm -rf tmp'."\n".
                 '  mkdir -p tmp/${SHORTTAG}'."\n".
@@ -837,13 +839,13 @@
                    '  for w in `ls movies/week/*.lst | cut -d\'/\' -f3 | cut -d\'.\' -f1`; do'."\n".
                    '    if [ ! -f movies/week/$w.mp4 ]; then'."\n".
                    '      echo "Kalenderwoche "$w'."\n".
-                   '      /usr/bin/sh '.$directory.'/create_movie_week.sh $w'."\n".
+                   '      /usr/bin/bash '.$directory.'/create_movie_week.sh $w'."\n".
                    '    fi'."\n".
                    '  done'."\n".
                    '  cp movies/week/*.mp4 tmp/${SHORTTAG}/filme/kw/'."\n";
         $text .= '  for Y in ${YEARS}; do '."\n".
                  '    for M in 01 02 03 04 05 06 07 08 09 10 11 12; do '."\n".
-                 '      [ -d ${Y}/${M} ] && zip -r tmp/${SHORTTAG}/${SHORTTAG}-${SUBDIR}-${Y}-${M} ${Y}/${M}'."\n".
+                 '      [ -d ${SUBDIR}/${Y}/${M} ] && zip -r tmp/${SHORTTAG}/${SHORTTAG}-${SUBDIR}-${Y}-${M} ${SUBDIR}/${Y}/${M}'."\n".
                  '    done'."\n".
                  '  done'."\n".
                  '  rsync -az -e ssh tmp/ cloud:/var/lib/wwwrun/data/mietkamera/files/'."\n".
@@ -853,7 +855,7 @@
                  '  rm -rf tmp'."\n".
                  '  echo "Die Archive befinden sich im Verzeichnis ${SHORTTAG}"'."\n".
                  'fi'."\n";
-        $filename = _SHORT_DIR_.'/'.$this->shorttag.'/img/export_to_cloud.sh';
+        $filename = _SHORT_DIR_.'/'.$this->shorttag.'/export_to_cloud.sh';
         $fh = fopen($filename, 'w') or die("can't open file");
         fwrite($fh,$text);
         fclose($fh);
