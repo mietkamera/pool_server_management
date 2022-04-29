@@ -16,10 +16,13 @@
       $this->api_type = 'm12d';
       $this->active = true;                       // true = die Kamera ist aktiv und wird monitored
       $this->active_monitoring = true;            // false = Monitoring erfolgt passiv
+      $this->allow_live = false;
       $this->image_iteration = '*/4';
       $this->image_profile = 'QXGA';
       $this->image_start = '6';
       $this->image_stop = '18';
+      $this->image_mask = '';
+      $this->image_mask_blur_level = "0x15";
       $this->pre_process_script = '';
       $this->alarm_mail = _ALARM_MAIL_;
       $this->alarm_mail_active = false;
@@ -55,8 +58,8 @@
       $this->api_user_secret = 'password';
       $this->payload = array();
       
-      $this->var_names = array("other","name","description","active","active_monitoring","api_type","image_iteration",
-                    "image_profile","image_start","image_stop","pre_process_script","alarm_mail", "alarm_mail_active",
+      $this->var_names = array("other","name","description","active","active_monitoring","allow_live","api_type","image_iteration","image_profile",
+                    "image_start","image_stop","image_mask","image_mask_blur_level","pre_process_script","alarm_mail", "alarm_mail_active",
                     "alarm_mail2", "alarm_mail2_active","project_id","project_contact","project_name","project_description",
                     "camera_url_protocol","camera_url_address","camera_url_port","camera_url_secret","router_type",
                     "router_url_port","router_url_secret","create_movie_week","create_movie_month","create_movie_year",
@@ -468,8 +471,14 @@
                 '    /usr/bin/convert ${SPATH}/${FILENAME}.tmp /dev/null 2>&1 | grep \'Corrupt\' >/dev/null '."\n".
                 '    if [ $? -ne 0 -a "${FILESIZE}" != "7073" ]; then'."\n".
                 '      # pre_process_script: '.($this->pre_process_script==''?'none':$this->pre_process_script)."\n".
-                '      '.PreProcessScript::command_to_execute($this->pre_process_script).' ${SPATH}/${FILENAME}.tmp ${SPATH}/${FILENAME}.jpg'."\n".
-                '      [ -s ${SPATH}/${FILENAME}.tmp ] && rm ${SPATH}/${FILENAME}.tmp'."\n".
+                '      '.PreProcessScript::command_to_execute($this->pre_process_script).' ${SPATH}/${FILENAME}.tmp ${SPATH}/${FILENAME}.jpg'."\n";
+        if ($this->image_mask!="") {
+          $text .=     '      if [ -f ${SPATH}/'.$this->image_mask.' ]; then'."\n".
+                '        mv ${SPATH}/${FILENAME}.jpg ${SPATH}/${FILENAME}.orig.jpg'."\n".
+                '        /usr/bin/convert ${SPATH}/${FILENAME}.orig.jpg -mask ${SPATH}/'.$this->image_mask.' -blur '.$this->image_mask_blur_level.' +mask ${SPATH}/${FILENAME}.jpg'."\n".
+                '      fi'."\n";
+        }
+        $text .='      [ -s ${SPATH}/${FILENAME}.tmp ] && rm ${SPATH}/${FILENAME}.tmp'."\n".
                 '      [ -L ${SPATH}/lastimage.jpg ] && rm ${SPATH}/lastimage.jpg'."\n".
                 '      ln -s ${FILENAME}.jpg ${SPATH}/lastimage.jpg'."\n".
                 '     else'."\n".
@@ -825,7 +834,7 @@
                 'cd '.$directory."\n".
                 'SHORTTAG='.$this->shorttag."\n".
                 'SUBDIR=img'."\n".
-                'cd '.$directory."/${SUBDIR}\n".
+                'cd '.$directory.'/${SUBDIR}'."\n".
                 'YEARS=`ls -d 20[[:digit:]][[:digit:]] | sort`'."\n".
                 'cd '.$directory."\n".
                 'if [ "${YEARS}" != "" ]; then'."\n".
