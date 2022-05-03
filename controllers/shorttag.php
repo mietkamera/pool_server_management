@@ -474,8 +474,9 @@
                 '      '.PreProcessScript::command_to_execute($this->pre_process_script).' ${SPATH}/${FILENAME}.tmp ${SPATH}/${FILENAME}.jpg'."\n";
         if ($this->image_mask!="") {
           $text .=     '      if [ -f ${SPATH}/'.$this->image_mask.' ]; then'."\n".
-                '        mv ${SPATH}/${FILENAME}.jpg ${SPATH}/${FILENAME}.orig.jpg'."\n".
-                '        /usr/bin/convert ${SPATH}/${FILENAME}.orig.jpg -mask ${SPATH}/'.$this->image_mask.' -blur '.$this->image_mask_blur_level.' +mask ${SPATH}/${FILENAME}.jpg'."\n".
+                '        mv ${SPATH}/${FILENAME}.jpg ${SPATH}/${FILENAME}.orig'."\n".
+                '        /usr/bin/convert ${SPATH}/${FILENAME}.orig -mask ${SPATH}/'.$this->image_mask.' -blur '.$this->image_mask_blur_level.' +mask ${SPATH}/${FILENAME}.jpg'."\n".
+                '        [ -s ${SPATH}/${FILENAME}.jpg ] && rm ${SPATH}/${FILENAME}.orig'."\n".
                 '      fi'."\n";
         }
         $text .='      [ -s ${SPATH}/${FILENAME}.tmp ] && rm ${SPATH}/${FILENAME}.tmp'."\n".
