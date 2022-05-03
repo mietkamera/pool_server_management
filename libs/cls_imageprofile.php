@@ -8,7 +8,7 @@
   class ImageProfile {
     public static $profiles = array( APIType::MOBOTIX => array( 'QXGA' => array('2048x1536','live'),
                                                                 'MEGA' => array('1280x960','live'),
-                                                                'XGA' => array('1024x768','live'),
+                                                                'XVGA' => array('1024x768','live'),
                                                                 'VGA' => array('640x480','live'),
                                                                 'CIF' => array('320x240','live'),
                                                                 '3D' => array('1280x960','both')
@@ -17,7 +17,7 @@
                                                                    '5MP' => array('2592x1944','live'),
                                                                    'QXGA' => array('2048x1536','live'),
                                                                    'MEGA' => array('1280x960','live'),
-                                                                   'XGA' => array('1024x768','live'),
+                                                                   'XVGA' => array('1024x768','live'),
                                                                    'VGA' => array('640x480','live'),
                                                                    'CIF' => array('320x240','live')
                                                                  ),
@@ -25,14 +25,14 @@
                                                                    '5MP' => array('2592x1944','live'),
                                                                    'QXGA' => array('2048x1536','live'),
                                                                    'MEGA' => array('1280x960','live'),
-                                                                   'XGA' => array('1024x768','live'),
+                                                                   'XVGA' => array('1024x768','live'),
                                                                    'VGA' => array('640x480','live'),
                                                                    'CIF' => array('320x240','live')
                                                                  ),
                                      APIType::AXIS => array ( '4K' => array('3840x2160','live'),
                                                               'HD' => array('1920x1080','live'),
                                                               'HD ready' => array('1280x720','live'),
-                                                              'XGA' => array('1024x768','live'),
+                                                              'XVGA' => array('1024x768','live'),
                                                               'SVGA' => array('800x600','live'),
                                                               'VGA' => array('640x480','live'),
                                                               'CIF' => array('320x240','live')
