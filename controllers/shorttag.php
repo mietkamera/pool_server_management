@@ -32,6 +32,9 @@
       $this->project_contact = '';
       $this->project_name = '';
       $this->project_description = '';
+      $this->location_id = '';
+      $this->lat = '';
+      $this->lon = '';
       $this->camera_url_protocol = 'http';
       $this->camera_url_address = '192.168.0.1';
       $this->camera_url_port = '8080';
@@ -60,7 +63,7 @@
       
       $this->var_names = array("other","name","description","active","active_monitoring","allow_live","api_type","image_iteration","image_profile",
                     "image_start","image_stop","image_mask","image_mask_blur_level","pre_process_script","alarm_mail", "alarm_mail_active",
-                    "alarm_mail2", "alarm_mail2_active","project_id","project_contact","project_name","project_description",
+                    "alarm_mail2", "alarm_mail2_active","project_id","project_contact","project_name","project_description","location_id","lat","lon",
                     "camera_url_protocol","camera_url_address","camera_url_port","camera_url_secret","router_type",
                     "router_url_port","router_url_secret","create_movie_week","create_movie_month","create_movie_year",
                     "create_movie_complete","movie_weekdays","movie_cropping","movie_daylight_filter","movie_max_frames_week",
