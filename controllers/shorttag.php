@@ -24,6 +24,9 @@
       $this->image_mask = '';
       $this->image_mask_blur_level = "0x15";
       $this->pre_process_script = '';
+      $this->alarm_mail_active_time = false;
+      $this->alarm_start = '6';
+      $this->alarm_stop = '18';
       $this->alarm_mail = _ALARM_MAIL_;
       $this->alarm_mail_active = false;
       $this->alarm_mail2 = '';
@@ -62,7 +65,8 @@
       $this->payload = array();
       
       $this->var_names = array("other","name","description","active","active_monitoring","allow_live","api_type","image_iteration","image_profile",
-                    "image_start","image_stop","image_mask","image_mask_blur_level","pre_process_script","alarm_mail", "alarm_mail_active",
+                    "image_start","image_stop","image_mask","image_mask_blur_level","pre_process_script",
+                    "alarm_mail_active_time","alarm_start","alarm_stop","alarm_mail", "alarm_mail_active",
                     "alarm_mail2", "alarm_mail2_active","project_id","project_contact","project_name","project_description","location_id","lat","lon",
                     "camera_url_protocol","camera_url_address","camera_url_port","camera_url_secret","router_type",
                     "router_url_port","router_url_secret","create_movie_week","create_movie_month","create_movie_year",
@@ -381,14 +385,21 @@
                 'FILETIMEDIFF=`expr '.ImageIteration::minute($this->image_iteration).' \* 60 \+ 180`'."\n".
                 'IMAGE_START="'.$this->image_start.'"'."\n".
                 'IMAGE_STOP="'.$this->image_stop.'"'."\n".
+                "ALARM_MAIL_ACTIVE_TIME='".$this->alarm_mail_active_time."'\n".
+                'declare -i ALARM_START'."\n".
+                'declare -i ALARM_STOP'."\n".
+                "ALARM_START=".$this->alarm_start."\n".
+                "ALARM_STOP=".$this->alarm_stop."\n".
                 "EMAIL='".$this->alarm_mail."'\n".
                 "EMAIL_ACTIVE='".($this->alarm_mail!=''?$this->alarm_mail_active:0)."'\n".
                 "EMAIL2='".$this->alarm_mail2."'\n".
                 "EMAIL2_ACTIVE='".($this->alarm_mail2!=''?$this->alarm_mail2_active:0)."'\n\n".
                 "CONTACT='".$this->strip_quotes(html_entity_decode($this->project_contact))."'\n".
                 "DESCRIPTION='".trim($this->strip_quotes(html_entity_decode($this->project_name." ".$this->name)))."'\n\n".
-                'FROM=\'-r "[mietkamera.de] Monitoring <noreply@mietkamera.de>"\''."\n".
-                "IDENT='".$this->strip_quotes(html_entity_decode($this->project_name.' : '.$this->name))."'\n";
+                "API_URL='https://".$_SERVER['SERVER_NAME']._URL_STUB_."/webcam/projekt/".$this->shorttag."'\n\n".
+                'FROM=\'-r "[mietkamera.de] Monitoring <support@mietkamera.de>"\''."\n".
+                "IDENT='".$this->strip_quotes(html_entity_decode($this->project_name.': ['.$this->shorttag.']'))."'\n".
+                "SHORTTAG='".$this->shorttag."'\n\n";
         $absolute_path = $_SERVER["DOCUMENT_ROOT"].substr($_SERVER["PHP_SELF"],0,strlen($_SERVER["PHP_SELF"])-10);
         if ($this->active_monitoring) {
           $text .= "CURL_CAMERA_URI='".$this->camera_url_protocol.'://'.$this->camera_url_secret.'@'.$this->camera_url_address.':'.$this->camera_url_port.APIType::get_monitor_url($this->api_type)."'\n".

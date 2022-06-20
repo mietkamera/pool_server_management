@@ -40,17 +40,17 @@ ENDFTIME
       fi
     fi
   else
-    ${CURL} -k --connect-timeout 20 --max-time 30 "${CURL_CAMERA_URI}" >/dev/null 2>&1
+    export OPENSSL_CONF=/etc/ssl/openssl.tlsv1.cnf; ${CURL} -k --connect-timeout 20 --max-time 30 "${CURL_CAMERA_URI}" >/dev/null 2>&1
     RETC=$?
-    if [ ${RETC} != "0" ]; then
-      ERRTEXT="Webcam failed"
+    if [ "${RETC}" != "0" ]; then
+      ERRTEXT="Webcam ausgefallen"
       ${CURL} -k --connect-timeout 20 --max-time 30 "${CURL_ROUTER_URI}" >/dev/null 2>&1
       RETR=$?
       if [ ${RETR} != "0" ]; then
-        ERRTEXT=${ERRTEXT}"\nRouter failed"
+        ERRTEXT=${ERRTEXT}": Router nicht erreichbar"
         EXITVAL=3
       else
-        ERRTEXT=${ERRTEXT}"\nRouter ok"
+        ERRTEXT=${ERRTEXT}": Router ok"
         EXITVAL=1
       fi
     else
