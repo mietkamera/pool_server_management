@@ -126,12 +126,19 @@ ENDHERE
       if [ $last_mod ]; then
         TIME_DIFF=`expr ${CURTIME} - ${last_mod}`
         if [ ${TIME_DIFF} -gt ${REPEATAFTER} ]; then
-          MAILTEXT="${IDENT} offline\n${ERRTEXT}\nKontakt: ${CONTACT}"
+          MAILSUBJECT="Webcam [${SHORTTAG}] vor mehr als 24 Stunden ausgefallen"
+          MAILTEXT="<html>
+  <p style=\"color:red\"><b>${IDENT}</b></p>
+  <p>${ERRTEXT}</p>
+  Pr&uuml;fen Sie bitte die Stromversorgung!
+  <p>Ihr Kameralink <a href=\"${API_URL}\">${API_URL}</a></p>
+  <p>Ihr Support-Team von mietkamera.de</p>
+</html>"
           if [ "${EMAIL}" != "" -a "${EMAIL_ACTIVE}" == "1" ]; then
-            echo -n "${MAILTEXT}" | mail -s "Webcam ${DESCRIPTION} still offline (>24h)" ${FROM} ${EMAIL}
+            echo ${MAILTEXT} | sed 's/\n//g' | mail -a 'Content-Type: text/html; charset="utf8"' -s "${MAILSUBJECT}" ${EMAIL} 
           fi
           if [ "${EMAIL2}" != "" -a "${EMAIL2_ACTIVE}" == "1" ]; then
-            echo -n "${MAILTEXT}" | mail -s "Webcam ${DESCRIPTION} still offline (>24h)" ${FROM} ${EMAIL2}
+            echo ${MAILTEXT} | sed 's/\n//g' | mail -a 'Content-Type: text/html; charset="utf8"' -s "${MAILSUBJECT}" ${EMAIL2}
           fi
           echo -n "escalated" > ${SCRIPT_PATH}/status
         fi
@@ -140,12 +147,18 @@ ENDHERE
     ;;
   soft_ok)
     if [ "${EXITVAL}" == "0" ]; then
-      MAILTEXT="${IDENT} online\n"
+      MAILSUBJECT="Webcam [${SHORTTAG}] wieder online"
+      MAILTEXT="<html>
+  <p style=\"color:darkgreen\"><b>${IDENT}</b></p>
+  <p>Die Kamera ist wieder online!</p>
+  <p>Ihr Kameralink <a href=\"${API_URL}\">${API_URL}</a></p>
+  <p>Ihr Support-Team von mietkamera.de</p>
+</html>"
       if [ "${EMAIL}" != "" -a "${EMAIL_ACTIVE}" == "1" ]; then
-        echo -n "${MAILTEXT}" | mail -s "Webcam ${DESCRIPTION} online" ${FROM} ${EMAIL}
+        echo ${MAILTEXT} | sed 's/\n//g' | mail -a 'Content-Type: text/html; charset="utf8"' -s "${MAILSUBJECT}" ${EMAIL}
       fi
       if [ "${EMAIL2}" != "" -a "${EMAIL2_ACTIVE}" == "1" ]; then
-        echo -n "${MAILTEXT}" | mail -s "Webcam ${DESCRIPTION} online" ${FROM} ${EMAIL2}
+        echo ${MAILTEXT} | sed 's/\n//g' | mail -a 'Content-Type: text/html; charset="utf8"' -s "${MAILSUBJECT}" ${EMAIL2}
       fi
       echo -n "${IDENT} online" > ${SCRIPT_PATH}/monitor/`date +%Y%m%d%H%M`.log
       echo -n "ok" > ${SCRIPT_PATH}/status
