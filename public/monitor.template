@@ -57,14 +57,14 @@ case "${STATUS}" in
         fi 
         if [ ${SEND_MAIL} -eq 1 ]; then
           MAILSUBJECT="Webcam [${SHORTTAG}] ausgefallen"
-          MAILTEXT="<html>
-  <p style=\"color:blue\"><b>${IDENT}</b></p>
-  <p>${ERRTEXT}</p>
-  Pr&uuml;fen Sie bitte die Stromversorgung!
-  <p>Ihr Kameralink <a href=\"${API_URL}\">${API_URL}</a></p>
-  <p>Ihr Support-Team von mietkamera.de</p>
+          MAILTEXT="<html>\n
+  <p style=\"color:blue\"><b>${IDENT}</b></p>\n
+  <p>${ERRTEXT}</p>\n
+  Pr&uuml;fen Sie bitte die Stromversorgung!\n
+  <p>Ihr Kameralink <a href=\"${API_URL}\">${API_URL}</a></p>\n
+  <p>Ihr Support-Team von mietkamera.de</p>\n
 </html>"
-          echo ${MAILTEXT} | sed 's/\n//g' | mail -a 'Content-Type: text/html; charset="utf8"' -s "${MAILSUBJECT}" ${EMAIL} 
+          echo -e ${MAILTEXT} | sed 's/\n/\n\r/g' | mail -a 'Content-Type: text/html; charset="utf8"' -s "${MAILSUBJECT}" ${EMAIL} 
         fi
       fi
     fi
@@ -96,18 +96,18 @@ ENDHERE
         fi
         if [ ${SEND_MAIL} -eq 1 ]; then
           MAILSUBJECT="Webcam [${SHORTTAG}] vor mehr als 4 Stunden ausgefallen"
-          MAILTEXT="<html>
-  <p style=\"color:red\"><b>${IDENT}</b></p>
-  <p>${ERRTEXT}</p>
-  Pr&uuml;fen Sie bitte die Stromversorgung!
-  <p>Ihr Kameralink <a href=\"${API_URL}\">${API_URL}</a></p>
-  <p>Ihr Support-Team von mietkamera.de</p>
+          MAILTEXT="<html>\n
+  <p style=\"color:red\"><b>${IDENT}</b></p>\n
+  <p>${ERRTEXT}</p>\n
+  Pr&uuml;fen Sie bitte die Stromversorgung!\n
+  <p>Ihr Kameralink <a href=\"${API_URL}\">${API_URL}</a></p>\n
+  <p>Ihr Support-Team von mietkamera.de</p>\n
 </html>"
           if [ "${EMAIL}" != "" -a "${EMAIL_ACTIVE}" == "1" ]; then
-            echo ${MAILTEXT} | sed 's/\n//g' | mail -a 'Content-Type: text/html; charset="utf8"' -s "${MAILSUBJECT}" ${EMAIL} 
+            echo -e ${MAILTEXT} | sed 's/\n/\n\r/g' | mail -a 'Content-Type: text/html; charset="utf8"' -s "${MAILSUBJECT}" ${EMAIL} 
           fi
           if [ "${EMAIL2}" != "" -a "${EMAIL2_ACTIVE}" == "1" ]; then
-            echo ${MAILTEXT} | sed 's/\n//g' | mail -a 'Content-Type: text/html; charset="utf8"' -s "${MAILSUBJECT}" ${EMAIL2} 
+            echo -e ${MAILTEXT} | sed 's/\n/\n\r/g' | mail -a 'Content-Type: text/html; charset="utf8"' -s "${MAILSUBJECT}" ${EMAIL2} 
           fi
           
         fi
@@ -139,18 +139,18 @@ ENDHERE
           fi
           if [ ${SEND_MAIL} -eq 1 ]; then
             MAILSUBJECT="Webcam [${SHORTTAG}] vor mehr als 24 Stunden ausgefallen"
-            MAILTEXT="<html>
-  <p style=\"color:red\"><b>${IDENT}</b></p>
-  <p>${ERRTEXT}</p>
-  Pr&uuml;fen Sie bitte die Stromversorgung!
-  <p>Ihr Kameralink <a href=\"${API_URL}\">${API_URL}</a></p>
-  <p>Ihr Support-Team von mietkamera.de</p>
+            MAILTEXT="<html>\n
+  <p style=\"color:red\"><b>${IDENT}</b></p>\n
+  <p>${ERRTEXT}</p>\n
+  Pr&uuml;fen Sie bitte die Stromversorgung!\n
+  <p>Ihr Kameralink <a href=\"${API_URL}\">${API_URL}</a></p>\n
+  <p>Ihr Support-Team von mietkamera.de</p>\n
 </html>"
             if [ "${EMAIL}" != "" -a "${EMAIL_ACTIVE}" == "1" ]; then
-              echo ${MAILTEXT} | sed 's/\n//g' | mail -a 'Content-Type: text/html; charset="utf8"' -s "${MAILSUBJECT}" ${EMAIL} 
+              echo -e ${MAILTEXT} | sed 's/\n/\n\r/g' | mail -a 'Content-Type: text/html; charset="utf8"' -s "${MAILSUBJECT}" ${EMAIL} 
             fi
             if [ "${EMAIL2}" != "" -a "${EMAIL2_ACTIVE}" == "1" ]; then
-              echo ${MAILTEXT} | sed 's/\n//g' | mail -a 'Content-Type: text/html; charset="utf8"' -s "${MAILSUBJECT}" ${EMAIL2}
+              echo -e ${MAILTEXT} | sed 's/\n/\n\r/g' | mail -a 'Content-Type: text/html; charset="utf8"' -s "${MAILSUBJECT}" ${EMAIL2}
             fi
           fi
         fi
@@ -165,17 +165,17 @@ ENDHERE
   soft_ok)
     if [ "${EXITVAL}" == "0" ]; then
       MAILSUBJECT="Webcam [${SHORTTAG}] wieder online"
-      MAILTEXT="<html>
-  <p style=\"color:darkgreen\"><b>${IDENT}</b></p>
-  <p>Die Kamera ist wieder online!</p>
-  <p>Ihr Kameralink <a href=\"${API_URL}\">${API_URL}</a></p>
-  <p>Ihr Support-Team von mietkamera.de</p>
+      MAILTEXT="<html>\n
+  <p style=\"color:darkgreen\"><b>${IDENT}</b></p>\n
+  <p>Die Kamera ist wieder online!</p>\n
+  <p>Ihr Kameralink <a href=\"${API_URL}\">${API_URL}</a></p>\n
+  <p>Ihr Support-Team von mietkamera.de</p>\n
 </html>"
       if [ "${EMAIL}" != "" -a "${EMAIL_ACTIVE}" == "1" ]; then
-        echo ${MAILTEXT} | sed 's/\n//g' | mail -a 'Content-Type: text/html; charset="utf8"' -s "${MAILSUBJECT}" ${EMAIL}
+        echo -e ${MAILTEXT} | sed 's/\n/\n\r/g' | mail -a 'Content-Type: text/html; charset="utf8"' -s "${MAILSUBJECT}" ${EMAIL}
       fi
       if [ "${EMAIL2}" != "" -a "${EMAIL2_ACTIVE}" == "1" ]; then
-        echo ${MAILTEXT} | sed 's/\n//g' | mail -a 'Content-Type: text/html; charset="utf8"' -s "${MAILSUBJECT}" ${EMAIL2}
+        echo -e ${MAILTEXT} | sed 's/\n/\n\r/g' | mail -a 'Content-Type: text/html; charset="utf8"' -s "${MAILSUBJECT}" ${EMAIL2}
       fi
       echo -n "${IDENT} online" > ${SCRIPT_PATH}/monitor/`date +%Y%m%d%H%M`.log
       echo -n "ok" > ${SCRIPT_PATH}/status
