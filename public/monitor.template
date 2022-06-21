@@ -126,23 +126,40 @@ ENDHERE
       if [ $last_mod ]; then
         TIME_DIFF=`expr ${CURTIME} - ${last_mod}`
         if [ ${TIME_DIFF} -gt ${REPEATAFTER} ]; then
-          MAILSUBJECT="Webcam [${SHORTTAG}] vor mehr als 24 Stunden ausgefallen"
-          MAILTEXT="<html>
+          if [ "${ALARM_MAIL_ACTIVE_TIME}" == "1" ]; then 
+            declare -i THISHOUR
+            THISHOUR=`date +%H`
+            if [ ${THISHOUR} -ge ${ALARM_START} -a ${THISHOUR} -lt ${ALARM_STOP} ]; then
+              SEND_MAIL=1
+              echo -n "long_offline" > ${SCRIPT_PATH}/status
+            fi
+          else
+            SEND_MAIL=1
+            echo -n "long_offline" > ${SCRIPT_PATH}/status
+          fi
+          if [ ${SEND_MAIL} -eq 1 ]; then
+            MAILSUBJECT="Webcam [${SHORTTAG}] vor mehr als 24 Stunden ausgefallen"
+            MAILTEXT="<html>
   <p style=\"color:red\"><b>${IDENT}</b></p>
   <p>${ERRTEXT}</p>
   Pr&uuml;fen Sie bitte die Stromversorgung!
   <p>Ihr Kameralink <a href=\"${API_URL}\">${API_URL}</a></p>
   <p>Ihr Support-Team von mietkamera.de</p>
 </html>"
-          if [ "${EMAIL}" != "" -a "${EMAIL_ACTIVE}" == "1" ]; then
-            echo ${MAILTEXT} | sed 's/\n//g' | mail -a 'Content-Type: text/html; charset="utf8"' -s "${MAILSUBJECT}" ${EMAIL} 
+            if [ "${EMAIL}" != "" -a "${EMAIL_ACTIVE}" == "1" ]; then
+              echo ${MAILTEXT} | sed 's/\n//g' | mail -a 'Content-Type: text/html; charset="utf8"' -s "${MAILSUBJECT}" ${EMAIL} 
+            fi
+            if [ "${EMAIL2}" != "" -a "${EMAIL2_ACTIVE}" == "1" ]; then
+              echo ${MAILTEXT} | sed 's/\n//g' | mail -a 'Content-Type: text/html; charset="utf8"' -s "${MAILSUBJECT}" ${EMAIL2}
+            fi
           fi
-          if [ "${EMAIL2}" != "" -a "${EMAIL2_ACTIVE}" == "1" ]; then
-            echo ${MAILTEXT} | sed 's/\n//g' | mail -a 'Content-Type: text/html; charset="utf8"' -s "${MAILSUBJECT}" ${EMAIL2}
-          fi
-          echo -n "escalated" > ${SCRIPT_PATH}/status
         fi
       fi
+    fi
+    ;;
+  long_offline)
+    if [ "${EXITVAL}" == "0" ]; then
+      echo -n "soft_ok" > ${SCRIPT_PATH}/status
     fi
     ;;
   soft_ok)
