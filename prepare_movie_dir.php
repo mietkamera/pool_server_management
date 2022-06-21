@@ -5,7 +5,7 @@
 
   /* Hilfsfunktionen ********************************************************************* */
   
-  function get_image_file_names($st,$date='') {
+  function get_image_file_names($st,$date='',$max=1500) {
   	
   	$images = array();
   	$image_stub_dir = _SHORT_DIR_.'/'.$st.'/img';
@@ -108,7 +108,16 @@
       }
     }
     sort($images);
-    return $images;
+    $pictures = array();
+    $teiler = ceil(count($images)/$max);
+    $i = 1;
+    foreach($images as $img) {
+      if ($i==$teiler)
+        $pictures[] = $img;
+        $i++;
+        if ($i>$teiler) $i=1;
+    }
+    return $pictures;
   }
   
   function get_video_file_names($st) {
@@ -150,7 +159,7 @@
   }
   
 
-  function pictures_of_week($st,$kw,$year=false) {
+  function pictures_of_week($st,$kw,$year=false,$max=1500) {
     if ($year==false) $year = date('Y');
     $pictures = array();
     if ($kw<1 || $kw>53) return pictures;
@@ -168,7 +177,16 @@
         
       $start += 60*60*24;
     }
-    return $pictures;
+    $images = array();
+    $teiler = ceil(count($pictures)/$max);
+    $i = 1;
+    foreach($pictures as $img) {
+      if ($i==$teiler)
+        $images[] = $img;
+        $i++;
+        if ($i>$teiler) $i=1;
+    }
+    return $images;
   }
 
   /* Ende Hilfsfunktionen **************************************************************** */
@@ -202,31 +220,35 @@
 
       if ($data['active']=="true") {
         if ($data['create_movie_week']==="true") {
+          $number = intval($data['movie_max_frames_week']);
           $dirname = _SHORT_DIR_.'/'.$dir.'/movies/week'; 
           $filename= $dirname.'/'.date('Y',time()).str_pad($kw,2,"0", STR_PAD_LEFT).'.lst';
           if (!is_dir($dirname)) mkdir($dirname, 0770, true);
-          $pictures = pictures_of_week($dir,$kw);
+          $pictures = pictures_of_week($dir, $kw, false, $number);
           file_put_contents($filename,$pictures);
         }
         if ($data['create_movie_month']==="true") {
+          $number = intval($data['movie_max_frames_month']);
           $dirname = _SHORT_DIR_.'/'.$dir.'/movies/month';
           $filename= $dirname.'/'.date('Ym',time()).'.lst';
           if (!is_dir($dirname)) mkdir($dirname, 0770, true);
-          $pictures = get_image_file_names($dir, date('Ym',time()));
+          $pictures = get_image_file_names($dir, date('Ym',time()), $number);
           file_put_contents($filename,$pictures);
         }      	  
         if ($data['create_movie_year']==="true") {
+          $number = intval($data['movie_max_frames_year']);
           $dirname = _SHORT_DIR_.'/'.$dir.'/movies/year';
           $filename= $dirname.'/'.date('Y',time()).'.lst';
           if (!is_dir($dirname)) mkdir($dirname, 0770, true);
-          $pictures = get_image_file_names($dir, date('Ym',time()));
+          $pictures = get_image_file_names($dir, date('Ym',time()), $number);
           file_put_contents($filename,$pictures);
         }
         if ($data['create_movie_complete']==="true") {
+          $number = intval($data['movie_max_frames_complete']);
           $dirname = _SHORT_DIR_.'/'.$dir.'/movies';
           $filename= $dirname.'/complete.lst';
           if (!is_dir($dirname)) mkdir($dirname, 0770, true);
-          $pictures = get_image_file_names($dir);
+          $pictures = get_image_file_names($dir, '', $number);
           file_put_contents($filename,$pictures);
         }
       }
